@@ -545,17 +545,23 @@
     function startPunchFlow() {
         if (!isAuthorized) {
             updateAuthUI(false);
-            showToast('!', 'Pairing required before typing', 'error');
+            showToast('🔒', 'Device not paired. Enter PIN from laptop screen', 'error');
             return;
         }
 
         const text = elements.textInput.value;
         if (!text.trim()) {
-            showToast('!', 'Enter or paste some text first', 'error');
+            showToast('✍️', 'Please enter or paste some text first', 'warning');
+            elements.textInput.focus();
+            if (elements.textareaWrapper) {
+                elements.textareaWrapper.classList.add('synced-highlight');
+                setTimeout(() => elements.textareaWrapper.classList.remove('synced-highlight'), 1200);
+            }
             return;
         }
         if (!isConnected) {
-            showToast('!', 'Not connected to companion', 'error');
+            showToast('⚡', 'Reconnecting to Auto Typer...', 'warning');
+            connect();
             return;
         }
 
@@ -670,8 +676,10 @@
 
     function updatePunchButtonState() {
         const hasText = elements.textInput.value.trim().length > 0;
-        elements.punchBtn.disabled = !hasText || !isConnected || !isAuthorized || isPunching;
-        elements.updateBtn.disabled = !isConnected || !isAuthorized || isPunching;
+        elements.punchBtn.disabled = isPunching;
+        elements.punchBtn.classList.toggle('not-ready', !hasText || !isConnected || !isAuthorized);
+        elements.updateBtn.disabled = isPunching;
+        elements.updateBtn.classList.toggle('not-ready', !isConnected || !isAuthorized);
     }
 
     function updateSpeedDisplay() {
@@ -882,8 +890,11 @@
                     return;
                 }
                 localStorage.setItem(TOKEN_KEY, pin);
-                if (ws) ws.close();
-                connect();
+                if (ws && ws.readyState === WebSocket.OPEN) {
+                    sendMessage({ type: 'auth', token: pin });
+                } else {
+                    connect();
+                }
             });
 
             elements.pinInput.addEventListener('keydown', (e) => {

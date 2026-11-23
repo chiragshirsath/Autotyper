@@ -187,9 +187,10 @@ func (s *Server) handleShutdown(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) handleWebSocket(w http.ResponseWriter, r *http.Request) {
 	token := r.URL.Query().Get("token")
-	authorized := s.auth.IsAuthorized(token)
 	clientIP := auth.ExtractClientIP(r)
 	userAgent := r.UserAgent()
+	isLocal := strings.HasPrefix(clientIP, "127.0.0.1") || strings.HasPrefix(clientIP, "::1") || clientIP == "localhost"
+	authorized := isLocal || s.auth.IsAuthorized(token)
 
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -247,6 +248,23 @@ func (s *Server) handleWebSocket(w http.ResponseWriter, r *http.Request) {
 		}
 
 		switch msg.Type {
+		case "auth":
+			authToken := strings.TrimSpace(msg.Token)
+			if s.auth.IsAuthorized(authToken) {
+				client.authorized = true
+				s.auth.UpdateSessionAuth(sessionID, true)
+				log.Printf("✓ Device %s successfully paired via PIN/Token", clientIP)
+				_ = client.send(state.WSMessage{
+					Type:       "sync_state",
+					Authorized: true,
+				})
+			} else {
+				_ = client.send(state.WSMessage{
+					Type:    "error",
+					Message: "Invalid PIN or pairing token. Please check the dashboard on your laptop.",
+				})
+			}
+
 		case "update_code":
 			if !client.authorized {
 				_ = client.send(state.WSMessage{

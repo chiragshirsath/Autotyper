@@ -725,10 +725,14 @@ body {
     transform: translateY(0) scale(0.98);
 }
 
-.punch-btn:disabled {
-    opacity: 0.35;
-    cursor: not-allowed;
+.punch-btn:disabled,
+.punch-btn.not-ready {
+    opacity: 0.55;
     box-shadow: none;
+}
+
+.update-btn.not-ready {
+    opacity: 0.5;
 }
 
 /* Update / Sync Button */

@@ -90,6 +90,15 @@ func (m *Manager) RegisterSession(id, remoteAddr, userAgent string, authorized b
 	}
 }
 
+// UpdateSessionAuth updates the authorization status of an active session.
+func (m *Manager) UpdateSessionAuth(id string, authorized bool) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if s, exists := m.sessions[id]; exists {
+		s.Authorized = authorized
+	}
+}
+
 // UnregisterSession removes a client connection.
 func (m *Manager) UnregisterSession(id string) {
 	m.mu.Lock()

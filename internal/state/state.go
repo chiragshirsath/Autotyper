@@ -34,4 +34,5 @@ type WSMessage struct {
 	State              *Settings `json:"state,omitempty"`
 	Sender             string    `json:"sender,omitempty"`
 	Authorized         bool      `json:"authorized,omitempty"`
+	Token              string    `json:"token,omitempty"`
 }
