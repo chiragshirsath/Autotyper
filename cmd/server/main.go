@@ -169,9 +169,12 @@ func main() {
 	dashboardURL := fmt.Sprintf("http://localhost:%d/dashboard", port)
 	log.Printf("📱 Pairing Dashboard: %s", dashboardURL)
 	log.Printf("🔑 Pairing PIN:        %s", authMgr.PairingPIN)
-	log.Println("──────────────────────────────────────────────────────────")
 	log.Println("  💡 Moving mouse to screen corner activates Emergency Stop")
-	log.Println("  🛑 Run stop.exe or click 'Stop Server' in dashboard to shut down")
+	stopCmd := "./stop"
+	if runtime.GOOS == "windows" {
+		stopCmd = "stop.exe"
+	}
+	log.Printf("  🛑 Run %s or click 'Stop Server' in dashboard to shut down", stopCmd)
 	log.Println("──────────────────────────────────────────────────────────")
 
 	// Open pairing dashboard automatically

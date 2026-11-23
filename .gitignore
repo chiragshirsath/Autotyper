@@ -5,6 +5,8 @@
 *.so
 *.dylib
 bin/
+server
+stop
 
 # OS files
 .DS_Store

@@ -36,6 +36,9 @@ func main() {
 		if runtime.GOOS == "windows" {
 			_ = exec.Command("taskkill", "/F", "/IM", "server.exe").Run()
 			_ = exec.Command("adb", "reverse", "--remove-all").Run()
+		} else {
+			_ = exec.Command("pkill", "-f", "server").Run()
+			_ = exec.Command("adb", "reverse", "--remove-all").Run()
 		}
 		fmt.Println("✅ Cleanup complete.")
 		pauseBeforeExit()

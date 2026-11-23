@@ -6,6 +6,8 @@ type KeySimulator interface {
 	PressEnter() error
 	PressTab() error
 	PressBackspace() error
+	PressForwardDelete() error
+	ClearLineIndent() error
 	PasteText(text string) error
 	CheckFailsafe() bool
 }

@@ -60,7 +60,7 @@ func NewEngine(broadcaster func(msg WSMessage)) *Engine {
 			WPM:                100,
 			FocusDelaySec:      3,
 			PreserveFormatting: true,
-			SmartIndent:        true,
+			SmartIndent:        false, // Disabled by default to prevent backspacing over newlines in VS Code
 			PasteMode:          false,
 			JitterMode:         false,
 			JitterLevel:        2, // Medium

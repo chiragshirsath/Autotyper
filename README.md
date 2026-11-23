@@ -47,27 +47,46 @@ Download the release package (`AutoTyper-v1.0.0-windows-amd64.zip`):
 📁 Auto Typer/
 ├── server.exe           ← Double-click to launch (runs in background, opens Pairing Hub)
 ├── stop.exe             ← Double-click to cleanly shut down
-└── allow-firewall.bat   ← Run once as Administrator if local Wi-Fi blocks connections
+└── allow-firewall.bat   ← Run once as Administrator if local Wi-Fi blocks connections (Windows)
 ```
 
-### 1. Launch Server
-Double-click **`server.exe`**. 
-- Runs in the background (no console window).
-- Automatically opens the **Pairing Hub** (`http://localhost:8080/dashboard`).
+### 🍎 macOS Quick Start
 
-### 2. Pair Your Phone
-- Scan the **QR Code** on the laptop dashboard using your phone's camera.
-- *Or*: Navigate to the displayed pairing URL and type the **6-digit PIN**.
+1. **Grant Accessibility Permissions** (Required for macOS keystroke simulation):
+   - Go to **System Settings** > **Privacy & Security** > **Accessibility**.
+   - Add and enable your **Terminal** (or iTerm2 / shell).
+2. **Start the Server**:
+   ```bash
+   ./start.sh
+   # or directly: ./server
+   ```
+   Automatically opens the **Pairing Hub** (`http://localhost:8080/dashboard`).
+3. **Stop Anytime**:
+   ```bash
+   ./stop.sh
+   # or directly: ./stop
+   # or click the red "Stop Server" button on the web dashboard
+   ```
 
-### 3. Start Typing
-1. Paste or type code into the phone app.
-2. Configure speed (10–500 WPM), Jitter level, and Oops typo rate.
-3. Tap **Start Typing** and switch focus to your target app during the countdown!
+---
 
-### 4. Stop Anytime
-- Double-click **`stop.exe`**, or
-- Click the red **🛑 Stop Server** button on the dashboard, or
-- Move your mouse to any screen corner for an instant emergency abort.
+### 🪟 Windows Quick Start
+
+1. **Launch Server**: Double-click **`server.exe`** (runs in background, opens Pairing Hub).
+2. **Stop Anytime**: Double-click **`stop.exe`** or click **Stop Server** on the dashboard.
+
+---
+
+### 📱 Pair & Type (Phone to Laptop)
+1. **Pair Your Phone**:
+   - Scan the **QR Code** on the laptop dashboard using your phone's camera.
+   - *Or*: Navigate to the displayed pairing URL and type the **6-digit PIN**.
+2. **Start Typing**:
+   - Paste or type code into the phone app.
+   - Configure speed (10–500 WPM), Jitter level, and Oops typo rate.
+   - Tap **Start Typing** and switch focus to your target app (VS Code, Xcode, terminal, editor) during the countdown!
+3. **Emergency Stop**:
+   - Move your mouse to any screen corner for an instant emergency abort failsafe.
 
 ---
 
@@ -75,17 +94,23 @@ Double-click **`server.exe`**.
 
 Requires [Go 1.22+](https://golang.org):
 
+### On macOS:
 ```bash
-# Clone the repository
-git clone <repo-url>
-cd "Auto typer"
+./build.sh
+# Or using make:
+make build
+# Or directly:
+go build -ldflags="-s -w" -o server ./cmd/server
+go build -ldflags="-s -w" -o stop ./cmd/stop
+```
 
-# Compile background server and stop utility
+### On Windows:
+```bash
 go build -ldflags="-H=windowsgui -s -w" -o server.exe ./cmd/server
 go build -ldflags="-s -w" -o stop.exe ./cmd/stop
 ```
 
-All HTML, CSS, JavaScript, and icons are embedded directly into `server.exe` using Go's `//go:embed`.
+All HTML, CSS, JavaScript, and icons are embedded directly into the binary using Go's `//go:embed`.
 
 ---
 
