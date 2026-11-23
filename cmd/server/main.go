@@ -134,7 +134,30 @@ func main() {
 	}
 	defer removeLockFile()
 
-	// 5. Check ADB & Setup Reverse Port Forwarding
+	// 5. Check ADB & Setup Reverse Port Forwarding (with background hotplug monitoring)
+	go func() {
+		var lastConnected bool
+		ticker := time.NewTicker(2 * time.Second)
+		defer ticker.Stop()
+
+		for range ticker.C {
+			status := adb.Check()
+			if status.Connected {
+				if !lastConnected || !adb.IsReverseActive(port) {
+					if err := adb.SetupReverse(port); err == nil {
+						log.Printf("🔌 ADB USB device connected (%s). Reverse tunnel active: http://localhost:%d", status.DeviceID, port)
+						lastConnected = true
+					}
+				}
+			} else {
+				if lastConnected {
+					log.Printf("ℹ️  ADB device disconnected. Reverted to Wi-Fi mode.")
+					lastConnected = false
+				}
+			}
+		}
+	}()
+
 	adbStatus := adb.Check()
 	if adbStatus.Connected {
 		log.Printf("🔌 ADB USB device detected (%s). Setting up reverse tunnel on port %d...", adbStatus.DeviceID, port)

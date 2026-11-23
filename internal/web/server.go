@@ -147,6 +147,9 @@ func (s *Server) handleQRCode(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) handleStatus(w http.ResponseWriter, r *http.Request) {
 	adbStatus := adb.Check()
+	if adbStatus.Connected && !adb.IsReverseActive(s.port) {
+		_ = adb.SetupReverse(s.port)
+	}
 	data := map[string]interface{}{
 		"port":          s.port,
 		"pairing_token": s.auth.PairingToken,

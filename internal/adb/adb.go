@@ -67,6 +67,20 @@ func Check() Status {
 	}
 }
 
+// IsReverseActive checks if reverse port forwarding is active for the given port.
+func IsReverseActive(port int) bool {
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+
+	portStr := fmt.Sprintf("tcp:%d", port)
+	cmd := exec.CommandContext(ctx, "adb", "reverse", "--list")
+	out, err := cmd.Output()
+	if err != nil {
+		return false
+	}
+	return strings.Contains(string(out), portStr)
+}
+
 // SetupReverse configures ADB reverse port forwarding.
 func SetupReverse(port int) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -81,6 +95,21 @@ func SetupReverse(port int) error {
 	return nil
 }
 
+// EnsureReverse checks if an ADB device is connected and ensures reverse tunnel is configured.
+func EnsureReverse(port int) (bool, error) {
+	status := Check()
+	if !status.Connected {
+		return false, nil
+	}
+	if IsReverseActive(port) {
+		return true, nil
+	}
+	if err := SetupReverse(port); err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
 // RemoveReverse removes all reverse port forwards.
 func RemoveReverse() {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
@@ -89,3 +118,4 @@ func RemoveReverse() {
 	cmd := exec.CommandContext(ctx, "adb", "reverse", "--remove-all")
 	_ = cmd.Run()
 }
+

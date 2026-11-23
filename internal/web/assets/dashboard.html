@@ -291,6 +291,7 @@
         let currentPort = 8080;
         let selectedHost = '';
         let availableIPs = [];
+        let userSelectedHost = false;
 
         async function fetchStatus() {
             try {
@@ -306,12 +307,25 @@
                 if (data.adb && data.adb.connected) {
                     adbBadge.className = 'badge badge-success';
                     adbBadge.textContent = '✓ USB Connected (' + data.adb.device_id + ')';
+                    adbBadge.title = 'Click to switch Pairing QR to USB Mode';
+                    adbBadge.style.cursor = 'pointer';
+                    adbBadge.onclick = () => {
+                        userSelectedHost = true;
+                        selectedHost = 'localhost';
+                        const select = document.getElementById('ip-select');
+                        if (select) select.value = 'localhost';
+                        updatePairingDisplay();
+                    };
                 } else if (data.adb && data.adb.installed) {
                     adbBadge.className = 'badge badge-warning';
                     adbBadge.textContent = 'Wi-Fi Mode (No USB)';
+                    adbBadge.onclick = null;
+                    adbBadge.style.cursor = 'default';
                 } else {
                     adbBadge.className = 'badge badge-warning';
                     adbBadge.textContent = 'Wi-Fi Mode';
+                    adbBadge.onclick = null;
+                    adbBadge.style.cursor = 'default';
                 }
 
                 // Update PIN
@@ -352,6 +366,17 @@
                     select.value = selectedHost;
                 }
 
+                // Auto-select localhost when USB ADB device is connected and user hasn't explicitly picked a different IP
+                if (data.adb && data.adb.connected && !userSelectedHost && selectedHost !== 'localhost') {
+                    selectedHost = 'localhost';
+                    const select = document.getElementById('ip-select');
+                    if (select) select.value = 'localhost';
+                } else if ((!data.adb || !data.adb.connected) && !userSelectedHost && selectedHost === 'localhost' && availableIPs.length > 0) {
+                    selectedHost = availableIPs[0];
+                    const select = document.getElementById('ip-select');
+                    if (select) select.value = selectedHost;
+                }
+
                 updatePairingDisplay();
 
                 // Update Devices
@@ -390,6 +415,7 @@
         }
 
         function onIPChange() {
+            userSelectedHost = true;
             const select = document.getElementById('ip-select');
             selectedHost = select.value;
             updatePairingDisplay();
